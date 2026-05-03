@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
 import path from "node:path";
 
-const HEALTH_ENDPOINT = "https://reservation.safehub-lcup.uk/health";
+const HEALTH_ENDPOINT = "https://reservation.safehub-lcup.uk/api/health";
 
 type HealthCheckResult = {
   ok: boolean;
@@ -24,6 +24,10 @@ const createWindow = () => {
     minWidth: 1024,
     minHeight: 640,
     backgroundColor: "#f6f8fb",
+    // Start in fullscreen/kiosk for a dedicated kiosk experience
+    fullscreen: true,
+    kiosk: true,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       webviewTag: true,

@@ -82,9 +82,60 @@ export function App() {
     webview.addEventListener("did-finish-load", handleLoadComplete);
     webview.addEventListener("did-fail-load", handleLoadFailed);
 
+    const handleCrashed = () => {
+      setErrorMessage("Kiosk webview crashed. Returning to error screen.");
+      setAppState("error");
+    };
+
+    webview.addEventListener("crashed", handleCrashed as EventListener);
+    webview.addEventListener("destroyed", handleCrashed as EventListener);
+
     return () => {
       webview.removeEventListener("did-finish-load", handleLoadComplete);
       webview.removeEventListener("did-fail-load", handleLoadFailed);
+      webview.removeEventListener("crashed", handleCrashed as EventListener);
+      webview.removeEventListener("destroyed", handleCrashed as EventListener);
+    };
+  }, [appState]);
+
+  // Periodic runtime health polling while kiosk is visible; if health fails, fall back to error screen
+  useEffect(() => {
+    let iv: ReturnType<typeof setInterval> | null = null;
+
+    async function checkNow() {
+      try {
+        const health = await window.kioskApi.checkHealth();
+        if (!health.ok) {
+          setErrorMessage(
+            health.reason ?? `Health check failed (status ${health.status})`,
+          );
+          setAppState("error");
+          // remove webview content
+          if (webviewRef.current) {
+            try {
+              webviewRef.current.setAttribute("src", "about:blank");
+            } catch {}
+          }
+        }
+      } catch (e) {
+        setErrorMessage("Runtime health check failed.");
+        setAppState("error");
+        if (webviewRef.current) {
+          try {
+            webviewRef.current.setAttribute("src", "about:blank");
+          } catch {}
+        }
+      }
+    }
+
+    if (appState === "loading" || appState === "ready") {
+      // run an immediate check and then poll every 15 seconds
+      void checkNow();
+      iv = setInterval(() => void checkNow(), 15000);
+    }
+
+    return () => {
+      if (iv) clearInterval(iv);
     };
   }, [appState]);
 
@@ -103,9 +154,9 @@ export function App() {
   const showKiosk = appState === "loading" || appState === "ready";
 
   return (
-    <main className="kiosk-shell min-h-screen overflow-hidden p-5 md:p-8">
+    <main className="kiosk-shell min-h-screen w-screen h-screen overflow-hidden">
       {showKiosk ? (
-        <section className="relative h-[calc(100vh-2.5rem)] overflow-hidden rounded-2xl border border-border/70 bg-card/70 shadow-2xl shadow-primary/10 backdrop-blur-sm md:h-[calc(100vh-4rem)]">
+        <section className="absolute inset-0 overflow-hidden bg-card/70">
           <webview
             ref={(node) => {
               webviewRef.current = node;
@@ -160,7 +211,7 @@ export function App() {
               </CardTitle>
               <CardDescription className="text-base">
                 {appState === "checking"
-                  ? "Verifying https://reservation.safehub-lcup.uk/health"
+                  ? "Verifying https://reservation.safehub-lcup.uk/api/health"
                   : errorMessage}
               </CardDescription>
             </CardHeader>
