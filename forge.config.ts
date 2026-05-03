@@ -6,25 +6,36 @@ import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { VitePlugin } from "@electron-forge/plugin-vite";
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    // base path, no extension
+    icon: join(__dirname, "assets", "icon"),
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}, ["win32"]),
+    new MakerSquirrel(
+      {
+        setupIcon: join(__dirname, "assets", "icon.ico"),
+        // optional, but if used this should usually be a real hosted URL,
+        // not file://
+        // iconUrl: "https://yourdomain.com/icon.ico",
+      },
+      ["win32"],
+    ),
     new MakerZIP({}, ["darwin"]),
     new MakerRpm({}, ["linux"]),
     new MakerDeb({}, ["linux"]),
   ],
   plugins: [
     new VitePlugin({
-      // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
-      // If you are familiar with Vite configuration, it will look really familiar.
       build: [
         {
-          // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
           entry: "src/main.ts",
           config: "vite.main.config.ts",
           target: "main",
@@ -42,8 +53,6 @@ const config: ForgeConfig = {
         },
       ],
     }),
-    // Fuses are used to enable/disable various Electron functionality
-    // at package time, before code signing the application
     new FusesPlugin({
       version: FuseVersion.V1,
       [FuseV1Options.RunAsNode]: false,

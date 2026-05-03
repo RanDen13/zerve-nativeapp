@@ -24,6 +24,7 @@ const createWindow = () => {
     minWidth: 1024,
     minHeight: 640,
     backgroundColor: "#f6f8fb",
+    icon: path.join(__dirname, "../icon.ico"),
     // Start in fullscreen/kiosk for a dedicated kiosk experience
     fullscreen: true,
     kiosk: true,
@@ -98,6 +99,9 @@ ipcMain.handle("kiosk:health-check", async (): Promise<HealthCheckResult> => {
     clearTimeout(timeout);
   }
 });
+
+// Set app icon for taskbar/dock
+app.setAppUserModelId("com.zerve.kiosk");
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

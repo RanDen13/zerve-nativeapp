@@ -23,6 +23,12 @@ export function App() {
     "Checking kiosk availability.",
   );
 
+  const dismissLoadingOverlay = useCallback(() => {
+    if (appState === "loading") {
+      setAppState("ready");
+    }
+  }, [appState]);
+
   const checkKioskAvailability = useCallback(async () => {
     setAppState("checking");
     setErrorMessage("Checking kiosk availability.");
@@ -67,6 +73,12 @@ export function App() {
       setAppState("ready");
     };
 
+    const handleLoadSettled = () => {
+      if (!(webview as any).isLoading()) {
+        setAppState("ready");
+      }
+    };
+
     const handleLoadFailed = (event: Event) => {
       const webviewEvent = event as Electron.DidFailLoadEvent;
 
@@ -80,7 +92,11 @@ export function App() {
     };
 
     webview.addEventListener("did-finish-load", handleLoadComplete);
+    webview.addEventListener("did-stop-loading", handleLoadSettled);
+    webview.addEventListener("dom-ready", handleLoadSettled);
     webview.addEventListener("did-fail-load", handleLoadFailed);
+
+    queueMicrotask(handleLoadSettled);
 
     const handleCrashed = () => {
       setErrorMessage("Kiosk webview crashed. Returning to error screen.");
@@ -92,6 +108,8 @@ export function App() {
 
     return () => {
       webview.removeEventListener("did-finish-load", handleLoadComplete);
+      webview.removeEventListener("did-stop-loading", handleLoadSettled);
+      webview.removeEventListener("dom-ready", handleLoadSettled);
       webview.removeEventListener("did-fail-load", handleLoadFailed);
       webview.removeEventListener("crashed", handleCrashed as EventListener);
       webview.removeEventListener("destroyed", handleCrashed as EventListener);
@@ -168,8 +186,15 @@ export function App() {
           />
 
           {appState === "loading" && (
-            <div className="kiosk-overlay absolute inset-0 z-10 flex items-center justify-center p-4">
-              <Card className="w-full max-w-xl border-border/70 bg-card/95 shadow-2xl">
+            <div
+              className="kiosk-overlay absolute inset-0 z-10 flex items-center justify-center p-4"
+              onClick={dismissLoadingOverlay}
+              onPointerDown={dismissLoadingOverlay}
+            >
+              <Card
+                className="w-full max-w-xl border-border/70 bg-card/95 shadow-2xl"
+                onClick={dismissLoadingOverlay}
+              >
                 <CardHeader className="space-y-4">
                   <Badge className="w-fit" variant="secondary">
                     Connecting

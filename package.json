@@ -1,6 +1,6 @@
 {
   "name": "zerve-nativeapp",
-  "productName": "zerve-nativeapp",
+  "productName": "Zerve Kiosk",
   "version": "1.0.0",
   "description": "Zerve Kiosk Native App",
   "main": ".vite/build/main.js",
