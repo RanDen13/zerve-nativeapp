@@ -25,7 +25,6 @@
   "include": [
     "src/**/*",
     "./package.json",
-    "./forge.config.ts",
     "./forge.env.d.ts",
     "*.mts"
   ]

@@ -1,4 +1,6 @@
 onlyBuiltDependencies:
+  - ejs
   - electron
   - electron-winstaller
+  - esbuild
   - msw

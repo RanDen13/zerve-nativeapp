@@ -87,10 +87,13 @@ typings/
 
 # Vite
 .vite/
+.builder/
 
-# Electron-Forge
+# Electron output
 out/
 
 # pnpm local store
 .pnpm-store/
 dist
+
+.builder

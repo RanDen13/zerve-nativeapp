@@ -94,7 +94,7 @@ function TabsTrigger({
     >
       {isActive && (
         <motion.span
-          layoutId={motionContext.layoutId}
+          layoutId={motionContext?.layoutId}
           className="absolute inset-0 z-0 rounded-md bg-black/8 shadow-sm dark:bg-white/12"
           transition={{ type: "spring", stiffness: 420, damping: 36 }}
         />

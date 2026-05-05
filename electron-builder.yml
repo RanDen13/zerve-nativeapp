@@ -1,0 +1,40 @@
+appId: com.zerve.kiosk
+productName: Zerve Kiosk
+asar: true
+npmRebuild: false
+beforeBuild: scripts/electron-builder-before-build.cjs
+
+directories:
+  output: ../../out
+
+files:
+  - "**/*"
+
+extraMetadata:
+  main: .vite/build/main.js
+
+win:
+  icon: assets/icon.ico
+  target:
+    - nsis
+    - portable
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+
+linux:
+  category: Utility
+  target:
+    - deb
+    - AppImage
+
+deb:
+  packageCategory: utility
+
+appImage:
+  artifactName: ${productName}-${version}-${arch}.${ext}

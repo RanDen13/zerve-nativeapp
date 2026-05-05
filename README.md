@@ -1,11 +1,12 @@
 # Zerve Kiosk Build Guide
 
-This project is configured to build on both Windows and Xubuntu.
+This project uses Vite for app bundling and Electron Builder for packaging.
 
 ## Prerequisites
 
 - Node.js 20+
 - pnpm 10+
+- Docker Desktop, only for Linux `.deb` / `.AppImage` builds from Windows
 - Project dependencies installed:
 
 ```bash
@@ -14,41 +15,41 @@ pnpm install
 
 ## Build On Windows
 
-Create Windows installer artifacts (Squirrel):
+Create the Windows installer:
 
 ```bash
 pnpm run make:win
 ```
 
-Output is generated under `out/make`.
-
-## Build On Xubuntu
-
-Install Linux packaging tools first:
+Create an unpacked Windows build for a quick package check:
 
 ```bash
-sudo apt update
-sudo apt install -y rpm fakeroot dpkg-dev build-essential
+pnpm run package
 ```
 
-Build both `.deb` and `.rpm` packages:
+Output is generated under `out/`.
+
+## Build Linux From Windows
+
+Start Docker Desktop first, then run:
 
 ```bash
 pnpm run make:linux
 ```
 
-Or build each target separately:
+Or build each Linux target separately:
 
 ```bash
 pnpm run make:linux:deb
+pnpm run make:linux:appimage
 pnpm run make:linux:rpm
 ```
 
-Output is generated under `out/make`.
+The Linux commands run Electron Builder inside the `electronuserland/builder:wine` Docker image, so you do not need to set up WSL manually.
+
+Output is generated under `out/`.
 
 ## Notes
 
-- Cross-building Windows installers from Linux (or Linux packages from Windows) is not part of this setup.
-- Recommended workflow:
-  - Build Windows artifacts on Windows.
-  - Build Linux artifacts on Xubuntu.
+- `pnpm run build` creates the `.vite` bundle and stages a minimal runtime app in `.builder/app`.
+- Electron Builder packages from `.builder/app`, which avoids pnpm workspace path issues on Windows.

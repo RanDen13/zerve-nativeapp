@@ -1,5 +1,4 @@
 import { app, BrowserWindow, ipcMain } from "electron";
-import started from "electron-squirrel-startup";
 import path from "node:path";
 
 const HEALTH_ENDPOINT = "https://reservation.safehub-lcup.uk/api/health";
@@ -11,11 +10,6 @@ type HealthCheckResult = {
   reason?: string;
 };
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (started) {
-  app.quit();
-}
-
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -24,7 +18,7 @@ const createWindow = () => {
     minWidth: 1024,
     minHeight: 640,
     backgroundColor: "#f6f8fb",
-    icon: path.join(__dirname, "../icon.ico"),
+    icon: path.join(__dirname, "../../assets/icon.ico"),
     // Start in fullscreen/kiosk for a dedicated kiosk experience
     fullscreen: true,
     kiosk: true,
